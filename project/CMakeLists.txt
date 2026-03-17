@@ -8,8 +8,12 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
-set(USER_DIR "${ROOT_DIR}/user")
+set(APP_DIR "${ROOT_DIR}/app")
+set(MODULE_DIR "${ROOT_DIR}/module")
+set(BSP_DIR "${ROOT_DIR}/bsp")
 set(LIB_DIR "${ROOT_DIR}/Libraries")
+set(FREERTOS_DIR "${LIB_DIR}/freertos")
+set(FREERTOS_PORT_DIR "${FREERTOS_DIR}/Source/portable/GCC/ARM_CM4F")
 set(LINKER_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/STM32G431RBTX_FLASH.ld")
 set(STARTUP_FILE "${LIB_DIR}/startup/startup_stm32g431xx.s")
 set(MCU_FLAGS
@@ -28,17 +32,38 @@ list(REMOVE_ITEM HAL_SOURCES
     "${LIB_DIR}/hal/stm32g4xx_hal_timebase_tim_template.c"
 )
 
-file(GLOB USER_SOURCES CONFIGURE_DEPENDS
-    "${USER_DIR}/*.c"
+file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
+    "${APP_DIR}/*.c"
+)
+
+file(GLOB_RECURSE MODULE_SOURCES CONFIGURE_DEPENDS
+    "${MODULE_DIR}/*.c"
+)
+
+file(GLOB_RECURSE BSP_SOURCES CONFIGURE_DEPENDS
+    "${BSP_DIR}/*.c"
+)
+
+set(FREERTOS_SOURCES
+    "${FREERTOS_DIR}/Source/list.c"
+    "${FREERTOS_DIR}/Source/queue.c"
+    "${FREERTOS_DIR}/Source/tasks.c"
+    "${FREERTOS_DIR}/Source/timers.c"
+    "${FREERTOS_DIR}/Source/event_groups.c"
+    "${FREERTOS_PORT_DIR}/port.c"
+    "${FREERTOS_DIR}/Source/portable/MemMang/heap_4.c"
 )
 
 set(SOURCE_FILES
     ${HAL_SOURCES}
+    ${FREERTOS_SOURCES}
     "${LIB_DIR}/hal/stm32g4xx_ll_fmc.c"
     "${LIB_DIR}/hal/stm32g4xx_ll_usb.c"
     "${LIB_DIR}/stm32g4/system_stm32g4xx.c"
     ${STARTUP_FILE}
-    ${USER_SOURCES}
+    ${APP_SOURCES}
+    ${MODULE_SOURCES}
+    ${BSP_SOURCES}
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
@@ -48,8 +73,15 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "${USER_DIR}"
+    "${APP_DIR}"
+    "${MODULE_DIR}"
+    "${BSP_DIR}/config"
+    "${BSP_DIR}/core"
+    "${BSP_DIR}/board"
+    "${BSP_DIR}/driver"
     "${LIB_DIR}/cmsis"
+    "${FREERTOS_DIR}/Source/include"
+    "${FREERTOS_PORT_DIR}"
     "${LIB_DIR}/hal"
     "${LIB_DIR}/hal/Legacy"
     "${LIB_DIR}/stm32g4"
