@@ -11,11 +11,14 @@
     "--completion-style=detailed"
   ],
   "cmake.configureOnOpen": false,
+  "cmake.cmakePath": "${workspaceFolder}/.vscode/nix-cmake",
   "cmake.buildDirectory": "${workspaceFolder}/build",
   "cmake.sourceDirectory": "${workspaceFolder}/project",
   "cmake.generator": "Ninja",
   "cmake.configureArgs": [
-    "-DCMAKE_SYSTEM_NAME=Generic"
+    "-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/project/arm-gnu-toolchain.cmake",
+    "-DCMAKE_SYSTEM_NAME=Generic",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE"
   ],
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one"

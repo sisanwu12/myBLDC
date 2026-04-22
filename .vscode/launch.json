@@ -8,6 +8,11 @@
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
+      "armToolchainPath": "${workspaceFolder}/.vscode",
+      "toolchainPrefix": "arm-none-eabi",
+      "gdbPath": "${workspaceFolder}/.vscode/nix-arm-none-eabi-gdb",
+      "objdumpPath": "${workspaceFolder}/.vscode/arm-none-eabi-objdump",
+      "serverpath": "${workspaceFolder}/.vscode/nix-openocd",
       "configFiles": [
         "interface/cmsis-dap.cfg",
         "target/stm32g4x.cfg"

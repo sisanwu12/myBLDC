@@ -4,7 +4,7 @@
 
 ## 1. 项目定位
 
-本工程基于 STM32 HAL，使用 `CMake + Ninja` 构建，使用 `OpenOCD` 烧录，使用 VSCode `cortex-debug` 调试。
+本工程基于 STM32 HAL，使用 `Nix` 统一管理 `CMake + Ninja + GNU Arm Embedded Toolchain + OpenOCD + clangd`，使用 VSCode `cortex-debug` 调试。
 
 当前工程重点提供：
 
@@ -179,9 +179,35 @@ void app_start(void);
 
 ## 7. 快速开始
 
-### 7.1 配置工程
+### 7.1 准备 Nix 环境
 
-在仓库根目录执行：
+开始前请确保本机已经安装 `nix`，并启用了 `nix-command` 与 `flakes`。
+
+本仓库通过 `flake.nix + flake.lock` 固定以下工具来源：
+
+- `cmake`
+- `ninja`
+- `arm-none-eabi-gcc / gdb / objcopy / size / objdump / nm`
+- `openocd`
+- `clang / clangd`
+
+在仓库根目录进入开发环境：
+
+```bash
+nix develop
+```
+
+进入 dev shell 后，下面的 `cmake`、`openocd` 等命令都来自 Nix，不依赖宿主机全局安装的 ARM 工具链。
+
+如果你正在本地修改 `flake.nix`、但这些改动还没有进入 Git 跟踪，可临时改用：
+
+```bash
+nix develop "path:$PWD"
+```
+
+### 7.2 配置工程
+
+在 dev shell 中执行：
 
 ```bash
 cmake \
@@ -193,13 +219,13 @@ cmake \
   -B build
 ```
 
-### 7.2 编译工程
+### 7.3 编译工程
 
 ```bash
 cmake --build build
 ```
 
-### 7.3 烧录工程
+### 7.4 烧录工程
 
 ```bash
 openocd \
@@ -208,9 +234,19 @@ openocd \
   -c "program build/template.elf verify reset exit"
 ```
 
-### 7.4 调试工程
+### 7.5 调试工程
 
-VSCode 调试配置 `Debug with OpenOCD` 使用：
+VSCode 推荐安装以下扩展：
+
+- `ms-vscode.cmake-tools`
+- `marus25.cortex-debug`
+- `llvm-vs-code-extensions.vscode-clangd`
+
+仓库内的 `.vscode/nix-*` 包装脚本会把 `CMake Configure`、`CMake Build`、`Flash` 以及 `Debug with OpenOCD` 全部接入同一个 Nix dev shell。
+
+这些包装脚本内部使用 `nix develop "path:$workspace_dir"`，因此即使 `flake.nix` 还没 `git add`，VSCode 任务和调试入口也可以直接读取当前工作区里的最新 flake 内容。
+
+`Debug with OpenOCD` 使用：
 
 - 可执行文件：`build/template.elf`
 - SVD：`project/STM32G431.svd`
