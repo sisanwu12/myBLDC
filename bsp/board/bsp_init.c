@@ -4,6 +4,7 @@
 #include "bsp_board.h"
 #include "bsp_clock.h"
 #include "bsp_gpio.h"
+#include "bsp_i2c.h"
 #include "bsp_pwm.h"
 #include "bsp_tim.h"
 #include "bsp_uart.h"
@@ -13,6 +14,7 @@ void bsp_init(void)
   HAL_Init();
   bsp_clock_init();
   bsp_gpio_init();
+  bsp_i2c_init();
   bsp_uart_init();
   bsp_pwm_init();
   bsp_adc_init();

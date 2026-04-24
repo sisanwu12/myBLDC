@@ -2,9 +2,12 @@
 
 #include "FreeRTOS.h"
 #include "bsp_board.h"
+#include "bsp_oled.h"
 #include "motor/module_motor.h"
 #include "portable.h"
 #include "task.h"
+
+#include <stdbool.h>
 
 #define APP_MOTOR_TASK_PRIORITY   ( tskIDLE_PRIORITY + 3U )
 #define APP_SERVICE_TASK_PRIORITY ( tskIDLE_PRIORITY + 2U )
@@ -23,6 +26,7 @@ volatile UBaseType_t g_app_service_task_stack_high_water = 0U;
 volatile UBaseType_t g_app_monitor_task_stack_high_water = 0U;
 volatile size_t g_app_rtos_free_heap_bytes = 0U;
 volatile size_t g_app_rtos_min_ever_free_heap_bytes = 0U;
+volatile bool g_app_oled_ready = false;
 
 static TaskHandle_t motor_task_handle = NULL;
 static TaskHandle_t service_task_handle = NULL;
@@ -50,9 +54,15 @@ void app_init(void)
   g_app_monitor_task_stack_high_water = 0U;
   g_app_rtos_free_heap_bytes = 0U;
   g_app_rtos_min_ever_free_heap_bytes = 0U;
+  g_app_oled_ready = false;
   motor_task_handle = NULL;
   service_task_handle = NULL;
   monitor_task_handle = NULL;
+
+  if (bsp_oled_init())
+  {
+    g_app_oled_ready = bsp_oled_show_test_pattern();
+  }
 }
 
 void app_start(void)
