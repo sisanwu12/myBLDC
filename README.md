@@ -23,6 +23,8 @@
 
 ```text
 myBLDC/
+├── flake.nix
+├── flake.lock
 ├── app/
 │   ├── app_main.c
 │   ├── app_task.c
@@ -45,6 +47,7 @@ myBLDC/
 │   ├── startup/
 │   └── stm32g4/
 ├── project/
+├── .vscode/
 ├── docs/
 └── README.md
 ```
@@ -61,6 +64,10 @@ myBLDC/
   放第三方底座，包括 HAL、CMSIS、startup，以及 FreeRTOS 内核源码。
 - `project/`
   放构建层配置，包括 CMake、工具链文件、链接脚本和 SVD。
+- `flake.nix / flake.lock`
+  固定 Nix 开发环境与工具链版本。
+- `.vscode/`
+  放 VSCode 的任务、调试配置，以及接入 Nix dev shell 的包装脚本。
 
 ## 3. 启动链路
 
@@ -177,9 +184,44 @@ void app_start(void);
 - `build/template.bin`
 - `build/template.map`
 
-## 7. 快速开始
+## 7. Nix 工具链设计
 
-### 7.1 准备 Nix 环境
+当前仓库使用 `flake.nix` 作为开发工具链入口，目标是让命令行与 VSCode 都依赖同一套 Nix 提供的工具，而不是宿主机全局环境。
+
+当前 dev shell 提供：
+
+- `cmake`
+- `ninja`
+- `arm-none-eabi-gcc`
+- `arm-none-eabi-gdb`
+- `arm-none-eabi-objcopy`
+- `arm-none-eabi-size`
+- `arm-none-eabi-objdump`
+- `arm-none-eabi-nm`
+- `openocd`
+- `clang / clangd`
+
+`project/arm-gnu-toolchain.cmake` 本身没有绑定某个固定安装目录，仍然只通过 `PATH` 查找 `arm-none-eabi-*`。这意味着：
+
+- 在 `nix develop` 中运行时，会自动使用 flake 提供的 ARM 工具链
+- 在 VSCode 中运行任务或调试时，会通过 `.vscode/nix-*` 包装脚本进入同一个 dev shell
+
+目前 `.vscode/` 下的关键入口如下：
+
+- `.vscode/nix-cmake`
+  使用 `nix develop "path:$workspace_dir"` 执行 `cmake`
+- `.vscode/nix-openocd`
+  使用 `nix develop "path:$workspace_dir"` 执行 `openocd`
+- `.vscode/nix-arm-none-eabi-gdb`
+  使用 `nix develop "path:$workspace_dir"` 执行 `arm-none-eabi-gdb`
+- `.vscode/arm-none-eabi-gdb`
+- `.vscode/arm-none-eabi-objdump`
+- `.vscode/arm-none-eabi-nm`
+  供 `cortex-debug` 在调试期间查找 GDB/objdump/nm 时使用，避免回退到系统 PATH
+
+## 8. 快速开始
+
+### 8.1 准备 Nix 环境
 
 开始前请确保本机已经安装 `nix`，并启用了 `nix-command` 与 `flakes`。
 
@@ -205,7 +247,7 @@ nix develop
 nix develop "path:$PWD"
 ```
 
-### 7.2 配置工程
+### 8.2 配置工程
 
 在 dev shell 中执行：
 
@@ -219,13 +261,13 @@ cmake \
   -B build
 ```
 
-### 7.3 编译工程
+### 8.3 编译工程
 
 ```bash
 cmake --build build
 ```
 
-### 7.4 烧录工程
+### 8.4 烧录工程
 
 ```bash
 openocd \
@@ -234,7 +276,7 @@ openocd \
   -c "program build/template.elf verify reset exit"
 ```
 
-### 7.5 调试工程
+### 8.5 调试工程
 
 VSCode 推荐安装以下扩展：
 
@@ -252,7 +294,7 @@ VSCode 推荐安装以下扩展：
 - SVD：`project/STM32G431.svd`
 - OpenOCD 配置：`interface/cmsis-dap.cfg + target/stm32g4x.cfg`
 
-## 8. 开发建议
+## 9. 开发建议
 
 - 应用调度与任务创建优先放在 `app/`
 - BLDC 业务逻辑优先放在 `module/`
