@@ -2,7 +2,7 @@
 
 #include "FreeRTOS.h"
 #include "bsp_board.h"
-#include "bsp_oled.h"
+#include "display/module_display.h"
 #include "motor/module_motor.h"
 #include "portable.h"
 #include "task.h"
@@ -59,9 +59,9 @@ void app_init(void)
   service_task_handle = NULL;
   monitor_task_handle = NULL;
 
-  if (bsp_oled_init())
+  if (module_display_init())
   {
-    g_app_oled_ready = bsp_oled_show_test_pattern();
+    g_app_oled_ready = module_display_show_demo();
   }
 }
 

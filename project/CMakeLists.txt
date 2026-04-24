@@ -14,6 +14,7 @@ set(BSP_DIR "${ROOT_DIR}/bsp")
 set(LIB_DIR "${ROOT_DIR}/Libraries")
 set(FREERTOS_DIR "${LIB_DIR}/freertos")
 set(FREERTOS_PORT_DIR "${FREERTOS_DIR}/Source/portable/GCC/ARM_CM4F")
+set(U8G2_DIR "${LIB_DIR}/u8g2")
 set(LINKER_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/STM32G431RBTX_FLASH.ld")
 set(STARTUP_FILE "${LIB_DIR}/startup/startup_stm32g431xx.s")
 set(MCU_FLAGS
@@ -44,6 +45,10 @@ file(GLOB_RECURSE BSP_SOURCES CONFIGURE_DEPENDS
     "${BSP_DIR}/*.c"
 )
 
+file(GLOB U8G2_SOURCES CONFIGURE_DEPENDS
+    "${U8G2_DIR}/csrc/*.c"
+)
+
 set(FREERTOS_SOURCES
     "${FREERTOS_DIR}/Source/list.c"
     "${FREERTOS_DIR}/Source/queue.c"
@@ -61,6 +66,7 @@ set(SOURCE_FILES
     "${LIB_DIR}/hal/stm32g4xx_ll_usb.c"
     "${LIB_DIR}/stm32g4/system_stm32g4xx.c"
     ${STARTUP_FILE}
+    ${U8G2_SOURCES}
     ${APP_SOURCES}
     ${MODULE_SOURCES}
     ${BSP_SOURCES}
@@ -79,6 +85,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${BSP_DIR}/core"
     "${BSP_DIR}/board"
     "${BSP_DIR}/driver"
+    "${U8G2_DIR}/csrc"
     "${LIB_DIR}/cmsis"
     "${FREERTOS_DIR}/Source/include"
     "${FREERTOS_PORT_DIR}"
