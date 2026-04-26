@@ -93,11 +93,16 @@ startup_stm32g431xx.s
      -> vTaskStartScheduler()
 ```
 
-默认时钟策略保持不变：
+BSP 初始化阶段会把复位后的默认 HSI16 时钟切换到 PLL 主频：
 
-- 使用 `HSI`
-- 主频 `16 MHz`
-- 不启用 `PLL`
+- PLL 输入：`HSI16 / 4 = 4 MHz`
+- PLL VCO：`4 MHz * 85 = 340 MHz`
+- 系统时钟：`PLL_R = 2`，`SYSCLK/HCLK = 170 MHz`
+- `APB1 / APB2`：均为 `170 MHz`
+- Flash latency：`FLASH_LATENCY_4`
+- 定时器等 APB 外设：总线时钟保持 `170 MHz`
+- I2C1 内核时钟：使用 `SYSCLK = 170 MHz`
+- I2C1 总线：启用 Fast-mode Plus，目标速率 `1 MHz`
 
 ## 4. FreeRTOS 接入方式
 

@@ -2,14 +2,14 @@
 
 #include "bsp_board.h"
 
-#define BSP_I2C1_TIMING_100KHZ_16MHZ ( 0x00503D58U )
+#define BSP_I2C1_TIMING_1MHZ_SYSCLK170 ( 0x1090162AU )
 
 static I2C_HandleTypeDef i2c1_handle;
 
 void bsp_i2c_init(void)
 {
   i2c1_handle.Instance = I2C1;
-  i2c1_handle.Init.Timing = BSP_I2C1_TIMING_100KHZ_16MHZ;
+  i2c1_handle.Init.Timing = BSP_I2C1_TIMING_1MHZ_SYSCLK170;
   i2c1_handle.Init.OwnAddress1 = 0U;
   i2c1_handle.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   i2c1_handle.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
